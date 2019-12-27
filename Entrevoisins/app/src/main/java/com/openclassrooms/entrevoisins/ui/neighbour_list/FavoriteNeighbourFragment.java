@@ -3,20 +3,20 @@ package com.openclassrooms.entrevoisins.ui.neighbour_list;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
-import com.google.android.material.snackbar.Snackbar;
-import androidx.fragment.app.Fragment;
-import androidx.recyclerview.widget.DividerItemDecoration;
-import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
-
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import androidx.fragment.app.Fragment;
+import androidx.recyclerview.widget.DividerItemDecoration;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
+
 import com.openclassrooms.entrevoisins.R;
 import com.openclassrooms.entrevoisins.di.DI;
 import com.openclassrooms.entrevoisins.events.DeleteNeighbourEvent;
+import com.openclassrooms.entrevoisins.events.ToggleNeighbourFavoriteStateEvent;
 import com.openclassrooms.entrevoisins.intents.IntentName;
 import com.openclassrooms.entrevoisins.model.Neighbour;
 import com.openclassrooms.entrevoisins.service.NeighbourApiService;
@@ -29,23 +29,23 @@ import org.greenrobot.eventbus.Subscribe;
 import java.util.List;
 
 
-public class NeighbourFragment extends Fragment {
+public class FavoriteNeighbourFragment extends Fragment {
 
     private NeighbourApiService mApiService;
-    private List<Neighbour> mNeighbours;
+    private List<Neighbour> mFavoritesNeighbours;
     private RecyclerView mRecyclerView;
 
     private MyNeighbourRecyclerViewAdapter adapter;
 
     /**
      * Create and return a new instance
-     * @return @{@link NeighbourFragment}
+     * @return @{@link FavoriteNeighbourFragment}
      */
-    public static NeighbourFragment newInstance() {
+    public static FavoriteNeighbourFragment newInstance() {
 
-        Log.i("DEBUG", "NeighbourFragment NewInstance");
+        Log.i("DEBUG", "FavoriteNeighbourFragment NewInstance");
 
-        NeighbourFragment fragment = new NeighbourFragment();
+        FavoriteNeighbourFragment fragment = new FavoriteNeighbourFragment();
         return fragment;
     }
 
@@ -55,7 +55,7 @@ public class NeighbourFragment extends Fragment {
         mApiService = DI.getNeighbourApiService();
         EventBus.getDefault().register(this);
 
-        Log.i("DEBUG", "NeighbourFragment onCreate");
+        Log.i("DEBUG", "FavoriteNeighbourFragment onCreate");
     }
 
     @Override
@@ -75,8 +75,8 @@ public class NeighbourFragment extends Fragment {
      * Init the List of neighbours
      */
     private void initList() {
-        mNeighbours = mApiService.getNeighbours();
-        adapter = new MyNeighbourRecyclerViewAdapter(mNeighbours);
+        mFavoritesNeighbours = mApiService.getFavoritesNeighbours();
+        adapter = new MyNeighbourRecyclerViewAdapter(mFavoritesNeighbours);
         mRecyclerView.setAdapter(adapter);
     }
 
@@ -93,20 +93,32 @@ public class NeighbourFragment extends Fragment {
     @Override
     public void onStart() {
         super.onStart();
-        Log.i("DEBUG", "NeighbourFragment onStart");
+        Log.i("DEBUG", "FavoriteNeighbourFragment onStart");
     }
 
     @Override
     public void onStop() {
         super.onStop();
-        Log.i("DEBUG", "NeighbourFragment onStop");
+        Log.i("DEBUG", "FavoriteNeighbourFragment onStop");
     }
 
     @Override
     public void onDestroy() {
         super.onDestroy();
         EventBus.getDefault().unregister(this);
-        Log.i("DEBUG", "NeighbourFragment onDestroy");
+        Log.i("DEBUG", "FavoriteNeighbourFragment onDestroy");
+    }
+
+    /**
+     * Fired if the user clicks on fav button
+     * @param event
+     */
+    @Subscribe
+    public void onToggleFavoriteState(ToggleNeighbourFavoriteStateEvent event) {
+        mApiService.toggleFavoriteState(event.neighbour);
+        initList();
+
+        Log.i("DEBUG", "toggle fav neighbour state");
     }
 
     /**
@@ -118,6 +130,6 @@ public class NeighbourFragment extends Fragment {
         mApiService.deleteNeighbour(event.neighbour);
         initList();
 
-        Log.i("DEBUG", "Neighbour deleted");
+        Log.i("DEBUG", "Neighbour deleted from FavoriteNeighbourFragment");
     }
 }

@@ -16,16 +16,24 @@ public class Neighbour {
     /** Avatar */
     private String avatarUrl;
 
+    /** state favorite of a neighbour */
+    private boolean isFavorite = false;
+
     /**
      * Constructor
      * @param id
      * @param name
      * @param avatarUrl
+     * @param isFavorite
      */
-    public Neighbour(Integer id, String name, String avatarUrl) {
+    public Neighbour(Integer id, String name, String avatarUrl, boolean isFavorite) {
         this.id = id;
         this.name = name;
         this.avatarUrl = avatarUrl;
+        this.isFavorite = isFavorite;
+    }
+
+    public Neighbour() {
     }
 
     public Integer getId() {
@@ -50,6 +58,14 @@ public class Neighbour {
 
     public void setAvatarUrl(String avatarUrl) {
         this.avatarUrl = avatarUrl;
+    }
+
+    public boolean isFavorite() {
+        return isFavorite;
+    }
+
+    public void setFavorite(boolean favorite) {
+        isFavorite = favorite;
     }
 
     @Override
