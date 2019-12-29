@@ -100,4 +100,6 @@
     <string name="neighbour_url_website">neighbour\'s url website</string>
     <string name="neighbour_desc_title">A propos de moi</string>
     <string name="neighbour_description">Neighbour\'s description</string>
+    <string name="no_neighbours_information">Neighbour\'s List is empty</string>
+    <string name="no_neighbours_favorites">You have no favorites</string>
 </resources>

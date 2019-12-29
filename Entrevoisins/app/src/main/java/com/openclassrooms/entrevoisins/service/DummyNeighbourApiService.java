@@ -1,8 +1,11 @@
 package com.openclassrooms.entrevoisins.service;
 
-import com.openclassrooms.entrevoisins.model.Neighbour;
+import android.content.Context;
 
-import java.util.ArrayList;
+import com.openclassrooms.entrevoisins.model.Neighbour;
+import com.openclassrooms.entrevoisins.utils.EntrevoisinsApp;
+import com.openclassrooms.entrevoisins.utils.SharedPreference;
+
 import java.util.List;
 
 /**
@@ -11,7 +14,9 @@ import java.util.List;
 public class DummyNeighbourApiService implements  NeighbourApiService {
 
     private List<Neighbour> neighbours = DummyNeighbourGenerator.generateNeighbours();
+    private SharedPreference sharedPreference;
 
+    private Context context = EntrevoisinsApp.getContext();
 
     /**
      * {@inheritDoc}
@@ -23,12 +28,11 @@ public class DummyNeighbourApiService implements  NeighbourApiService {
 
     @Override
     public List<Neighbour> getFavoritesNeighbours() {
-        List<Neighbour> favorites = new ArrayList<>();
-        for (Neighbour neighbour : neighbours){
-            if (neighbour.isFavorite()){
-                favorites.add(neighbour);
-            }
-        }
+
+        sharedPreference = new SharedPreference();
+        List<Neighbour> favorites;
+        favorites = sharedPreference.getFavorites(context);
+
         return favorites;
     }
 
@@ -42,7 +46,13 @@ public class DummyNeighbourApiService implements  NeighbourApiService {
 
     @Override
     public void toggleFavoriteState(Neighbour neighbour) {
-        neighbours.get(neighbours.indexOf(neighbour)).setFavorite(!neighbour.isFavorite());
+        if (neighbour.isFavorite()){
+            neighbour.setFavorite(false);
+            sharedPreference.removeFavorite(context , neighbour);
+        } else {
+            neighbour.setFavorite(true);
+            sharedPreference.addFavorite(context, neighbour);
+        }
     }
 
     @Override

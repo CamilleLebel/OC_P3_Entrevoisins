@@ -1,6 +1,9 @@
 package com.openclassrooms.entrevoisins.ui.neighbour_list;
 
 import androidx.recyclerview.widget.RecyclerView;
+
+import android.app.AlertDialog;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -45,7 +48,22 @@ public class MyNeighbourRecyclerViewAdapter extends RecyclerView.Adapter<MyNeigh
                 .apply(RequestOptions.circleCropTransform())
                 .into(holder.mNeighbourAvatar);
 
-        holder.mDeleteButton.setOnClickListener(v -> EventBus.getDefault().post(new DeleteNeighbourEvent(neighbour)));
+        holder.mDeleteButton.setOnClickListener(v -> {
+            AlertDialog alertDialog = new AlertDialog.Builder(v.getContext()).create();
+            alertDialog.setTitle("Warning !");
+            alertDialog.setMessage("Do you want to delete the neighbour ?");
+            alertDialog.setCancelable(true);
+
+            alertDialog.setButton(AlertDialog.BUTTON_POSITIVE, "YES", (dialogInterface, i) -> {
+                dialogInterface.dismiss();
+
+                EventBus.getDefault().post(new DeleteNeighbourEvent(neighbour));
+
+                Log.i("DEBUG", "neighbour deleted");
+            });
+            alertDialog.setButton(AlertDialog.BUTTON_NEGATIVE, "NO", (dialogInterface, i) -> dialogInterface.dismiss());
+            alertDialog.show();
+        });
     }
 
     @Override
@@ -55,6 +73,7 @@ public class MyNeighbourRecyclerViewAdapter extends RecyclerView.Adapter<MyNeigh
 
     /**
      * get a user from a position
+     * @param position of the neighbour
      * */
 
     public Neighbour getNeighbour(int position){

@@ -7,6 +7,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.TextView;
 
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.DividerItemDecoration;
@@ -28,12 +29,20 @@ import org.greenrobot.eventbus.Subscribe;
 
 import java.util.List;
 
+import butterknife.BindView;
+import butterknife.ButterKnife;
+
 
 public class FavoriteNeighbourFragment extends Fragment {
 
     private NeighbourApiService mApiService;
     private List<Neighbour> mFavoritesNeighbours;
-    private RecyclerView mRecyclerView;
+
+    @BindView(R.id.tv_no_favorites)
+    public TextView tvNoFavorites;
+
+    @BindView(R.id.list_favorite_neighbours)
+    public RecyclerView mRecyclerView;
 
     private MyNeighbourRecyclerViewAdapter adapter;
 
@@ -61,12 +70,14 @@ public class FavoriteNeighbourFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.fragment_neighbour_list, container, false);
+        View view = inflater.inflate(R.layout.fragment_favorite_neighbour_list, container, false);
         Context context = view.getContext();
-        mRecyclerView = (RecyclerView) view;
+        ButterKnife.bind(this, view);
+
         mRecyclerView.setLayoutManager(new LinearLayoutManager(context));
         mRecyclerView.addItemDecoration(new DividerItemDecoration(getContext(), DividerItemDecoration.VERTICAL));
         initList();
+        checkIfRecyclerViewIsEmpty();
         initClickOnItem();
         return view;
     }
@@ -88,6 +99,16 @@ public class FavoriteNeighbourFragment extends Fragment {
                     intent.putExtra(IntentName.INFORMATION_ACTIVITY_INTENT_NAME, selectedNeighbour.getId());
                     startActivity(intent);
                 });
+    }
+
+    private void checkIfRecyclerViewIsEmpty() {
+        if (this.adapter.getItemCount() == 0) {
+            this.mRecyclerView.setVisibility(View.INVISIBLE);
+            this.tvNoFavorites.setVisibility(View.VISIBLE);
+        } else {
+            this.mRecyclerView.setVisibility(View.VISIBLE);
+            this.tvNoFavorites.setVisibility(View.INVISIBLE);
+        }
     }
 
     @Override
@@ -115,10 +136,19 @@ public class FavoriteNeighbourFragment extends Fragment {
      */
     @Subscribe
     public void onToggleFavoriteState(ToggleNeighbourFavoriteStateEvent event) {
-        mApiService.toggleFavoriteState(event.neighbour);
-        initList();
-
-        Log.i("DEBUG", "toggle fav neighbour state");
+        if (mFavoritesNeighbours.contains(event.neighbour)){
+            mApiService.toggleFavoriteState(event.neighbour);
+            Log.i("DEBUG", "toggle fav neighbour state into false");
+            mFavoritesNeighbours.remove(event.neighbour);
+            adapter.notifyDataSetChanged();
+            checkIfRecyclerViewIsEmpty();
+        } else {
+            mApiService.toggleFavoriteState(event.neighbour);
+            Log.i("DEBUG", "toggle fav neighbour state into true");
+            mFavoritesNeighbours.add(event.neighbour);
+            adapter.notifyDataSetChanged();
+            checkIfRecyclerViewIsEmpty();
+        }
     }
 
     /**
@@ -127,9 +157,17 @@ public class FavoriteNeighbourFragment extends Fragment {
      */
     @Subscribe
     public void onDeleteNeighbour(DeleteNeighbourEvent event) {
-        mApiService.deleteNeighbour(event.neighbour);
-        initList();
 
-        Log.i("DEBUG", "Neighbour deleted from FavoriteNeighbourFragment");
+        if (mFavoritesNeighbours.contains(event.neighbour)){
+            if (event.neighbour.isFavorite()){
+                mApiService.toggleFavoriteState(event.neighbour);
+            }
+            mApiService.deleteNeighbour(event.neighbour);
+            mFavoritesNeighbours.remove(event.neighbour);
+            adapter.notifyDataSetChanged();
+            checkIfRecyclerViewIsEmpty();
+
+            Log.i("DEBUG", "Neighbour deleted from FavoriteNeighbourFragment");
+        }
     }
 }

@@ -3,7 +3,7 @@ package com.openclassrooms.entrevoisins.events;
 import com.openclassrooms.entrevoisins.model.Neighbour;
 
 /**
- * Event fired when a user change the favori state of a neighbour.
+ * Event fired when a user change the favorite state of a neighbour.
  */
 
 public class ToggleNeighbourFavoriteStateEvent {

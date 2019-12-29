@@ -13,6 +13,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.TextView;
 
 import com.openclassrooms.entrevoisins.R;
 import com.openclassrooms.entrevoisins.di.DI;
@@ -25,15 +26,25 @@ import com.openclassrooms.entrevoisins.utils.ItemClickSupport;
 
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
+import org.w3c.dom.Text;
 
 import java.util.List;
+
+import butterknife.BindView;
+import butterknife.ButterKnife;
 
 
 public class NeighbourFragment extends Fragment {
 
     private NeighbourApiService mApiService;
     private List<Neighbour> mNeighbours;
-    private RecyclerView mRecyclerView;
+
+
+    @BindView(R.id.tv_no_neighbours)
+    public TextView tvNoNeighbours;
+
+    @BindView(R.id.list_neighbours)
+    public RecyclerView mRecyclerView;
 
     private MyNeighbourRecyclerViewAdapter adapter;
 
@@ -63,10 +74,13 @@ public class NeighbourFragment extends Fragment {
                              Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_neighbour_list, container, false);
         Context context = view.getContext();
-        mRecyclerView = (RecyclerView) view;
+        ButterKnife.bind(this, view);
+
         mRecyclerView.setLayoutManager(new LinearLayoutManager(context));
         mRecyclerView.addItemDecoration(new DividerItemDecoration(getContext(), DividerItemDecoration.VERTICAL));
+
         initList();
+        checkIfRecyclerViewIsEmpty();
         initClickOnItem();
         return view;
     }
@@ -88,6 +102,19 @@ public class NeighbourFragment extends Fragment {
                     intent.putExtra(IntentName.INFORMATION_ACTIVITY_INTENT_NAME, selectedNeighbour.getId());
                     startActivity(intent);
                 });
+    }
+
+    /**
+     * Vérifie si la liste de voisin est vide.
+     */
+    private void checkIfRecyclerViewIsEmpty() {
+        if (this.adapter.getItemCount() == 0) {
+            this.mRecyclerView.setVisibility(View.INVISIBLE);
+            this.tvNoNeighbours.setVisibility(View.VISIBLE);
+        } else {
+            this.mRecyclerView.setVisibility(View.VISIBLE);
+            this.tvNoNeighbours.setVisibility(View.INVISIBLE);
+        }
     }
 
     @Override
@@ -115,9 +142,12 @@ public class NeighbourFragment extends Fragment {
      */
     @Subscribe
     public void onDeleteNeighbour(DeleteNeighbourEvent event) {
-        mApiService.deleteNeighbour(event.neighbour);
-        initList();
+        if (mNeighbours.contains(event.neighbour)){
+            mApiService.deleteNeighbour(event.neighbour);
+            adapter.notifyDataSetChanged();
+            checkIfRecyclerViewIsEmpty();
 
-        Log.i("DEBUG", "Neighbour deleted");
+            Log.i("DEBUG", "Neighbour deleted");
+        }
     }
 }

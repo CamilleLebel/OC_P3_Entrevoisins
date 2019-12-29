@@ -1,5 +1,7 @@
 package com.openclassrooms.entrevoisins.events;
 
+import android.util.Log;
+
 import com.openclassrooms.entrevoisins.model.Neighbour;
 import com.openclassrooms.entrevoisins.service.NeighbourApiService;
 

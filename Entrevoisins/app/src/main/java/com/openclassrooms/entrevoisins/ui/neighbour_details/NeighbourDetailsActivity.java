@@ -1,7 +1,5 @@
 package com.openclassrooms.entrevoisins.ui.neighbour_details;
 
-import android.graphics.Color;
-import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
 
 import com.google.android.material.appbar.CollapsingToolbarLayout;
@@ -9,20 +7,20 @@ import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
+import androidx.coordinatorlayout.widget.CoordinatorLayout;
+
 import android.util.Log;
-import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
-import com.bumptech.glide.request.target.BitmapImageViewTarget;
 import com.openclassrooms.entrevoisins.R;
 import com.openclassrooms.entrevoisins.di.DI;
-import com.openclassrooms.entrevoisins.events.DeleteNeighbourEvent;
 import com.openclassrooms.entrevoisins.events.ToggleNeighbourFavoriteStateEvent;
 import com.openclassrooms.entrevoisins.intents.IntentName;
 import com.openclassrooms.entrevoisins.model.Neighbour;
 import com.openclassrooms.entrevoisins.service.NeighbourApiService;
+import com.openclassrooms.entrevoisins.utils.SharedPreference;
 
 import org.greenrobot.eventbus.EventBus;
 
@@ -39,6 +37,9 @@ public class NeighbourDetailsActivity extends AppCompatActivity {
     private Neighbour selectedNeighbour;
 
     //FOR UI
+
+    @BindView(R.id.details_content)
+    public CoordinatorLayout coordinatorLayout;
 
     @BindView(R.id.backgroundImageView)
     public ImageView header;
@@ -71,6 +72,8 @@ public class NeighbourDetailsActivity extends AppCompatActivity {
     private String selectedName;
     private String selectedAvatar;
 
+    private SharedPreference sharedPreference;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -93,11 +96,17 @@ public class NeighbourDetailsActivity extends AppCompatActivity {
     @OnClick(R.id.fabfav)
     public void toggleNeighbourFavoriteState(){
         if (selectedNeighbour.isFavorite()){
+            fabFav.hide();
             fabFav.setImageResource(R.drawable.ic_star_border_white_24dp);
+            fabFav.show();
             EventBus.getDefault().post(new ToggleNeighbourFavoriteStateEvent(selectedNeighbour));
+            selectedNeighbour.setFavorite(false);
         } else {
+            fabFav.hide();
             fabFav.setImageResource(R.drawable.ic_star_white_24dp);
+            fabFav.show();
             EventBus.getDefault().post(new ToggleNeighbourFavoriteStateEvent(selectedNeighbour));
+            selectedNeighbour.setFavorite(true);
         }
     }
 
@@ -105,6 +114,8 @@ public class NeighbourDetailsActivity extends AppCompatActivity {
         selectedId = selectedNeighbour.getId();
         selectedName = selectedNeighbour.getName();
         selectedAvatar = selectedNeighbour.getAvatarUrl();
+
+        sharedPreference = new SharedPreference();
 
         if (selectedId != Integer.MAX_VALUE){
             Glide.with(getApplicationContext())
@@ -118,10 +129,12 @@ public class NeighbourDetailsActivity extends AppCompatActivity {
             neighbourUrlWebsite.setText(selectedName + "'s url website");
             neighbourDesc.setText(selectedName + "'s description");
         }
-        if (selectedNeighbour.isFavorite()){
+        if (apiService.getFavoritesNeighbours().contains(selectedNeighbour)){
             fabFav.setImageResource(R.drawable.ic_star_white_24dp);
+            selectedNeighbour.setFavorite(true);
         } else {
             fabFav.setImageResource(R.drawable.ic_star_border_white_24dp);
+            selectedNeighbour.setFavorite(false);
         }
     }
 }
