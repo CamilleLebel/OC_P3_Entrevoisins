@@ -6,11 +6,18 @@ import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentPagerAdapter;
 
+import com.openclassrooms.entrevoisins.model.Neighbour;
+
 
 public class ListNeighbourPagerAdapter extends FragmentPagerAdapter {
 
+    private final Fragment[] fragments;
+
     public ListNeighbourPagerAdapter(FragmentManager fm) {
         super(fm);
+        fragments = new Fragment[]{
+                NeighbourFragment.newInstance(), FavoriteNeighbourFragment.newInstance()
+        };
     }
 
     /**
@@ -20,11 +27,7 @@ public class ListNeighbourPagerAdapter extends FragmentPagerAdapter {
      */
     @Override
     public Fragment getItem(int position) {
-        if (position == 0) {
-            return NeighbourFragment.newInstance();
-        } else {
-            return FavoriteNeighbourFragment.newInstance();
-        }
+        return fragments[position];
     }
 
     /**
@@ -33,6 +36,6 @@ public class ListNeighbourPagerAdapter extends FragmentPagerAdapter {
      */
     @Override
     public int getCount() {
-        return 2;
+        return fragments.length;
     }
 }

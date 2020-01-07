@@ -60,7 +60,6 @@ public class NeighboursListTest {
     // This is fixed
     private static int ITEMS_COUNT = 12;
 
-    private NeighbourApiService apiService;
 
     private ListNeighbourActivity mActivity;
     private SharedPreference sharedPreference;
@@ -76,7 +75,6 @@ public class NeighboursListTest {
         sharedPreference = new SharedPreference();
 
         Context targetContext = getInstrumentation().getTargetContext();
-        apiService = DI.getNewInstanceApiService();
 
         favorites = sharedPreference.getFavorites(targetContext);
         if (favorites.size() > 0){
@@ -87,7 +85,7 @@ public class NeighboursListTest {
     }
 
     /**
-     * We ensure that our recyclerview is displaying at least on item
+     * We ensure that our recyclerview is displaying at least one item
      */
     @Test
     public void myNeighboursList_shouldNotBeEmpty() {
